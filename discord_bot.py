@@ -12,8 +12,14 @@ DISCORD_TOKEN = config["DISCORD_TOKEN"]
 
 intents = discord.Intents.default()
 intents.message_content = True
-discord_bot = commands.Bot(command_prefix="!", intents=intents)
 activity = discord.Game(name="Telegram")
+
+discord_bot = commands.Bot(
+    command_prefix="!",
+    intents=intents,
+    help_command=None
+)
+
 
 @discord_bot.event
 async def on_ready():
