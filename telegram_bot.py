@@ -62,7 +62,8 @@ async def tg_to_discord(message: Message):
         return
 
     author = message.from_user.first_name
-    content = f"[{author}]: "
+    tg_link = f"https://t.me/{message.chat.username}/{message.message_id}"
+    content = f"[[{author}]({tg_link})]:"
 
     if message.text:
         content += f"\n{message.text}"
@@ -75,23 +76,23 @@ async def tg_to_discord(message: Message):
     if message.photo:
         photo = message.photo[-1]
         file = await tg_bot.get_file(photo.file_id)
-        file_url = content + f"\nhttps://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path}"
+        file_url = content + f"\n[Изображение](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
         await discord_channel.send(file_url)
 
     # Документы и файлы
     if message.document:
         file = await tg_bot.get_file(message.document.file_id)
-        file_url = content + f"\nhttps://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path}"
+        file_url = content + f"\n[Файл](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
         await discord_channel.send(file_url)
 
     # Видео
     if message.video:
         file = await tg_bot.get_file(message.video.file_id)
-        file_url = content + f"\nhttps://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path}"
+        file_url = content + f"\n[Видео](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
         await discord_channel.send(file_url)
 
     # Стикеры
     if message.sticker:
         file = await tg_bot.get_file(message.sticker.file_id)
-        file_url = content + f"\nhttps://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path}"
+        file_url = content + f"\n[Стикер](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
         await discord_channel.send(file_url)

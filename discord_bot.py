@@ -29,7 +29,7 @@ async def on_ready():
 @discord_bot.command(name="help")
 async def help_commands(ctx):
     await ctx.send(
-        f"Добро пожаловать на страницу помощи бота! Вот все существующие команды:\n"
+        f"Добро пожаловать на страницу помощи бота! Вот все существующие команды:\n\n"
         f"!link - начинает цикл привязки. Вы получите код, который будет необходимо ввести в телеграм чате\n"
         f"!unlink - отвязывает чаты друг от друга"
     )
@@ -63,6 +63,8 @@ async def unlink_cmd(ctx):
 
 @discord_bot.event
 async def on_message(message):
+    discord_link = message.jump_url
+
     if message.author.bot:
         return
 
@@ -70,9 +72,11 @@ async def on_message(message):
     tg_chat_id = get_tg_target(message.channel.id)
     if tg_chat_id:
         # Формируем текст
-        content = f"[{message.author.display_name}]:"
+        content = f"[{message.author.display_name}]({discord_link}):"
+
         if message.content:
             content += f"\n{message.content}"
+
 
         # Вложения
         if message.attachments:
@@ -82,6 +86,5 @@ async def on_message(message):
                 else:
                     await tg_bot.send_document(chat_id=tg_chat_id, document=attachment.url, caption=content)
         else:
-            await tg_bot.send_message(chat_id=tg_chat_id, text=content)
+            await tg_bot.send_message(chat_id=tg_chat_id, text=content, parse_mode="Markdown", disable_web_page_preview=True)
 
-    await discord_bot.process_commands(message)
