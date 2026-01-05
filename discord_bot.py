@@ -82,6 +82,14 @@ async def unlink_cmd(ctx):
 
 @discord_bot.event
 async def on_message(message):
+
+
+    #1 👉 СНАЧАЛА даём шанс командам
+    await discord_bot.process_commands(message)
+
+    # ❗ Если это команда — НЕ пересылаем
+    if message.content.startswith("!"):
+        return
     discord_link = message.jump_url
 
     if message.author.bot:
@@ -106,5 +114,3 @@ async def on_message(message):
                     await tg_bot.send_document(chat_id=tg_chat_id, document=attachment.url, caption=content)
         else:
             await tg_bot.send_message(chat_id=tg_chat_id, text=content, parse_mode="Markdown", disable_web_page_preview=True)
-
-    await discord_bot.process_commands(message)
