@@ -1,0 +1,17 @@
+{
+  "help.title": "Welcome to the bot help page!",
+  "help.commands": "Here are all available commands:",
+  "cmd.link": "!link — starts the linking process",
+  "cmd.unlink": "!unlink — unlinks chats",
+  "link.code": "Your confirmation code: **{code}**",
+  "link.instruction": "Add the Telegram bot and send:\n`/confirm {code}`",
+  "unlink.success": "✅ The link has been removed.",
+  "unlink.none": "ℹ️ This channel was not linked.",
+  "language_set.succes": "Language changed to: ",
+  "not_approved": "You have no permissions to use this command.",
+  "command.error": "Uh oh, there is an error happened while completing command:",
+  "sticker": "Sticker",
+  "photo": "Image",
+  "video": "Video",
+  "file": "File"
+}

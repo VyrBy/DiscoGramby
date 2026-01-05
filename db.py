@@ -10,6 +10,7 @@ def get_db():
 def init_db():
     db = get_db()
     c = db.cursor()
+
     c.execute("""
         CREATE TABLE IF NOT EXISTS pending_links (
             code INTEGER PRIMARY KEY,
@@ -19,6 +20,7 @@ def init_db():
             created_at INTEGER
         )
     """)
+
     c.execute("""
         CREATE TABLE IF NOT EXISTS linked_chats (
             discord_guild_id INTEGER,
@@ -26,5 +28,15 @@ def init_db():
             telegram_chat_id INTEGER
         )
     """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS chat_settings (
+            platform TEXT,          -- "discord" | "telegram"
+            chat_id INTEGER,
+            language TEXT,
+            PRIMARY KEY (platform, chat_id)
+        )
+    """)
+
     db.commit()
     db.close()

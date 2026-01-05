@@ -1,13 +1,13 @@
 from aiogram import Bot, Dispatcher
 from aiogram import Router, F
-from aiogram.enums import ChatType
 from aiogram.types import Message, ChatMemberAdministrator, ChatMemberOwner
 from aiogram.filters import Command
 from link_system.find_link import get_discord_target
 from link_system.telegram_confirm import confirm_code
-import json
 from db import get_db
-
+from lang_store import set_lang, get_lang
+from i18n import t
+import json
 
 with open("cfg.json", "r", encoding="utf-8") as f:
     config = json.load(f)
@@ -22,12 +22,30 @@ router = Router()
 def is_admin(status):
     return isinstance(status, (ChatMemberAdministrator, ChatMemberOwner))
 
+@router.message(Command("lang"))
+async def set_lang_cmd(message: Message):
+    parts = message.text.split()
+    if len(parts) != 2:
+        await message.reply("Usage: /lang <ru|en>")
+        return
+
+    lang = parts[1].lower()
+    if lang not in ("ru", "en"):
+        await message.reply("Available languages: ru, en")
+        return
+
+    set_lang("telegram", message.chat.id, lang)
+    await message.reply(f"🌍 Language set to {lang}")
+
+
 @router.message(F.text == "/unlink")
 async def unlink_cmd(message: Message):
     # Проверяем, что пользователь — администратор
     member = await message.bot.get_chat_member(message.chat.id, message.from_user.id)
+    lang = get_lang("telegram", message.chat.id)
+
     if not is_admin(member):
-        await message.reply("❌ Эту команду могут использовать только администраторы группы.")
+        await message.reply(t('message.error', lang))
         return
 
     db = get_db()
@@ -40,9 +58,9 @@ async def unlink_cmd(message: Message):
     db.close()
 
     if deleted > 0:
-        await message.reply("✅ Эта Telegram-группа успешно отвязана от Discord.")
+        await message.reply(t('unlinked.success', lang))
     else:
-        await message.reply("ℹ️ Эта группа не была привязана.")
+        await message.reply(t('unlink.none', lang))
 
 # Команда /confirm
 @dp.message(Command(commands=["confirm"]))
@@ -55,6 +73,7 @@ async def tg_to_discord(message: Message):
     target = get_discord_target(message.chat.id)
     if not target:
         return  # связь не настроена
+    lang = get_lang("telegram", message.chat.id)
 
     guild_id, channel_id = target
     # discord_channel нужно получить из discord_bot
@@ -78,23 +97,23 @@ async def tg_to_discord(message: Message):
     if message.photo:
         photo = message.photo[-1]
         file = await tg_bot.get_file(photo.file_id)
-        file_url = content + f"\n[Изображение](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
+        file_url = content + f"\n[{t('photo', lang)}](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
         await discord_channel.send(file_url)
 
     # Документы и файлы
     if message.document:
         file = await tg_bot.get_file(message.document.file_id)
-        file_url = content + f"\n[Файл](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
+        file_url = content + f"\n[{t('file', lang)}](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
         await discord_channel.send(file_url)
 
     # Видео
     if message.video:
         file = await tg_bot.get_file(message.video.file_id)
-        file_url = content + f"\n[Видео](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
+        file_url = content + f"\n[{t('video', lang)}](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
         await discord_channel.send(file_url)
 
     # Стикеры
     if message.sticker:
         file = await tg_bot.get_file(message.sticker.file_id)
-        file_url = content + f"\n[Стикер](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
+        file_url = content + f"\n[{t('sticker', lang)}](https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file.file_path})"
         await discord_channel.send(file_url)

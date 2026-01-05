@@ -4,6 +4,8 @@ from discord_link import start_link_process
 import json
 from link_system.find_link import get_tg_target
 from telegram_bot import tg_bot
+from lang_store import set_lang, get_lang
+from i18n import t
 
 with open("cfg.json", "r", encoding="utf-8") as f:
     config = json.load(f)
@@ -20,6 +22,17 @@ discord_bot = commands.Bot(
     help_command=None
 )
 
+@discord_bot.command(name="lang")
+@commands.has_permissions(administrator=True)
+async def set_language(ctx, lang: str):
+    lang = lang.lower()
+
+    if lang not in ("ru", "en"):
+        await ctx.send("❌ Available languages: ru, en")
+        return
+
+    set_lang("discord", ctx.guild.id, lang)
+    await ctx.send(f"{t('language_set.succes', lang)}")
 
 @discord_bot.event
 async def on_ready():
@@ -28,12 +41,17 @@ async def on_ready():
 
 @discord_bot.command(name="help")
 async def help_commands(ctx):
-    await ctx.send(
-        f"Добро пожаловать на страницу помощи бота! Вот все существующие команды:\n\n"
-        f"!link - начинает цикл привязки. Вы получите код, который будет необходимо ввести в телеграм чате\n"
-        f"!unlink - отвязывает чаты друг от друга"
+    lang = get_lang("discord", ctx.guild.id)
+
+    text = (
+        f"{t('help.title', lang)}\n\n"
+        f"{t('help.commands', lang)}\n"
+        f"{t('cmd.link', lang)}\n"
+        f"{t('cmd.unlink', lang)}"
     )
-    print("Отправлен раздел помощи")
+
+    await ctx.send(text)
+
 
 # команда !link
 @discord_bot.command(name="link")
@@ -56,10 +74,11 @@ async def unlink_cmd(ctx):
     db.commit()
     db.close()
 
+    lang = get_lang("discord", ctx.guild.id)
     if deleted > 0:
-        await ctx.send("✅ Привязка к Telegram-группе была удалена.")
+        await ctx.send(t('unlink.success', lang))
     else:
-        await ctx.send("ℹ️ Этот канал не был привязан.")
+        await ctx.send(t('link.none', lang))
 
 @discord_bot.event
 async def on_message(message):
@@ -88,3 +107,4 @@ async def on_message(message):
         else:
             await tg_bot.send_message(chat_id=tg_chat_id, text=content, parse_mode="Markdown", disable_web_page_preview=True)
 
+    await discord_bot.process_commands(message)
