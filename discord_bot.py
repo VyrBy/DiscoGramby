@@ -32,7 +32,7 @@ async def set_language(ctx, lang: str):
         return
 
     set_lang("discord", ctx.guild.id, lang)
-    await ctx.send(f"{t('language_set.succes', lang)}")
+    await ctx.send(f"{t('language_set.succes' + f"{lang}", lang)}")
 
 @discord_bot.event
 async def on_ready():
