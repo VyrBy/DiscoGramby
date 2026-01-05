@@ -67,7 +67,7 @@ async def tg_to_discord(message: Message):
     tg_link = message.get_url()
 
     if tg_link:
-        content = f"[{author}]({tg_link}):"
+        content = f"[[{author}]({tg_link})]:"
     else:
         content = f"[{author}]:"
 

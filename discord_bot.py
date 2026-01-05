@@ -72,7 +72,7 @@ async def on_message(message):
     tg_chat_id = get_tg_target(message.channel.id)
     if tg_chat_id:
         # Формируем текст
-        content = f"[{message.author.display_name}]({discord_link}):"
+        content = f"[[{message.author.display_name}]({discord_link})]:"
 
         if message.content:
             content += f"\n{message.content}"
