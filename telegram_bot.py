@@ -1,5 +1,6 @@
 from aiogram import Bot, Dispatcher
 from aiogram import Router, F
+from aiogram.enums import ChatType
 from aiogram.types import Message, ChatMemberAdministrator, ChatMemberOwner
 from aiogram.filters import Command
 from link_system.find_link import get_discord_target
@@ -16,6 +17,7 @@ TELEGRAM_TOKEN = config["TELEGRAM_TOKEN"]
 tg_bot = Bot(token=TELEGRAM_TOKEN)
 dp = Dispatcher()
 router = Router()
+
 
 def is_admin(status):
     return isinstance(status, (ChatMemberAdministrator, ChatMemberOwner))
@@ -62,15 +64,15 @@ async def tg_to_discord(message: Message):
         return
 
     author = message.from_user.first_name
-    tg_link = f"https://t.me/{message.chat.username}/{message.message_id}"
-    content = f"[[{author}]({tg_link})]:"
+    tg_link = message.get_url()
+
+    if tg_link:
+        content = f"[{author}]({tg_link}):"
+    else:
+        content = f"[{author}]:"
 
     if message.text:
-        content += f"\n{message.text}"
-
-    # Сначала отправим текст (если есть)
-    if message.text:
-        await discord_channel.send(content)
+        await discord_channel.send(f"{content}\n{message.text}")
 
     # Фото
     if message.photo:
